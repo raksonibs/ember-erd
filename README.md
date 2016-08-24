@@ -4,7 +4,7 @@ A project to visualize your model directory, and give a good indication of how w
 
 Install via `npm install ember-erd`.
 
-By running `node run ember-erd`, you generate an index.html you can view.
+By running `node node_modules/ember-erd/bin/index.js`, you generate an index.html you can view.
 
 * double arrow means hasMany both Ways
 * hasOne is a straight line inbetween
