@@ -1,11 +1,14 @@
 {
   "name": "ember-erd",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "mocha --report test test",
     "ember-erd": "node index.js"
+  },
+ "bin": {
+      "ember-erd": "index.js"
   },
   "keywords": [],
   "author": "Oskar Niburski <oskarniburski@gmail.com> (http://raksonibs.github.io)",
