@@ -4,13 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --report test test",
+    "ember-erd": "node index.js"
   },
   "keywords": [],
   "author": "Oskar Niburski <oskarniburski@gmail.com> (http://raksonibs.github.io)",
   "license": "ISC",
   "dependencies": {
+    "assert": "^1.4.1",
     "async": "^2.0.1",
+    "mocha": "^3.0.2",
     "path": "^0.12.7",
     "q": "^1.4.1",
     "requirejs": "^2.2.0",

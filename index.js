@@ -4,6 +4,7 @@ var path = require('path');
 var async = require("async");
 var _ = require("underscore");
 Q = require('q');
+var appDir = path.dirname(require.main.filename);
 
 var capitalize = function(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -298,7 +299,7 @@ function readLinesFromFile(keys, j, model, newRow) {
   string += modelString;
 }
 
-fs.readdir(path.resolve(__dirname, 'app/models/'), function (err, data) {
+fs.readdir(path.resolve(process.cwd(), 'app/models/'), function (err, data) {
   if (err) {
     return console.log(err);
   }
@@ -318,7 +319,7 @@ fs.readdir(path.resolve(__dirname, 'app/models/'), function (err, data) {
                         "attributes": [],
                         "relationships": {"belongsTo": [], "hasMany": []}
                       };
-        fs.readFile(path.resolve(__dirname, "app/models/" + data[i]), "utf8", function(err, fileData) {
+        fs.readFile(path.resolve(process.cwd(), "app/models/" + data[i]), "utf8", function(err, fileData) {
           readLines(fileData, addToModels, model);
 
           if (data[data.length - 1].split(".")[0] === model) {            
@@ -337,7 +338,7 @@ fs.readdir(path.resolve(__dirname, 'app/models/'), function (err, data) {
 
             string += addStringScript()
 
-            fs.writeFile(path.resolve(__dirname, 'index.html'), string, function(err) {
+            fs.writeFile(path.resolve(process.cwd(), 'index.html'), string, function(err) {
               if (err) {
                   return console.log(err);
               }
