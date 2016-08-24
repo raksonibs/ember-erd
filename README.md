@@ -6,8 +6,7 @@ Install via `npm install ember-erd`.
 
 By running `node node_modules/ember-erd/bin/index.js`, you generate an index.html you can view.
 
-![alt tag](http://imgur.com/a/tTaZH)
-![stack Overflow](http://lmsotfy.com/so.png)
+![Screenshot](http://i.imgur.com/a/tTaZH.png?raw=true)
 
 * double arrow means hasMany both Ways
 * hasOne is a straight line inbetween
