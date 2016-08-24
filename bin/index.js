@@ -136,7 +136,7 @@ return `
           arrows[i].remove();
         })()
       };
-      console.log("started")
+      
       var models = document.getElementsByClassName('model');
       var belongsTo, hasMany, modelName;
       for (var i =0; i < models.length; i++) {
@@ -201,9 +201,9 @@ return `
             }                              
           }
         }
-        console.log("modelName: " + modelName + " with belongsTo " + belongsTo + " and hasMany " + hasMany );
+        
       }
-      console.log('finished')
+      
     }
 
     window.onresize = init
@@ -274,7 +274,7 @@ function readLinesFromFile(keys, j, model, newRow) {
 
   var relationships = models[key]["relationships"];
 
-  console.log(newRow)
+  
   if (newRow && j !== 0) {
     // need to close old new row
     modelString += `</div><div class='row ${j % 2 === 0 ? 'offset' : ''}'>`
