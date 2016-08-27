@@ -12,7 +12,9 @@ var capitalize = function(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-var models = {}
+var models = {};
+var directory;
+var mainDirectory;
 
 var string = `<!DOCTYPE html>
 <html>
@@ -301,25 +303,24 @@ function readLinesFromFile(keys, j, model, newRow) {
   string += modelString;
 }
 
-var readAll= function(options) {
-  var directory = options || 'app/models/';
-  console.log("RUNNING WITH DIRECTORY", directory);
-  fs.readdir(path.resolve(process.cwd(), directory), function (err, data) {
+function readAll(options, mainDirectory, callback) {  
+  // console.log("RUNNING WITH DIRECTORY", directory);
+  fs.readdir(path.join(mainDirectory, directory), function (err, data) {
     if (err) {
-      console.log(err);
+      // console.log(err);
       return "ERROR. No such directory";
     }
 
-    console.log("FOUND DIRECTORY", directory);
-    console.log(data);
+    // console.log("FOUND DIRECTORY", directory);
+    // console.log(data);
 
     for (var i = 0; i < data.length; i++) {
       if (/\.js/.test(data[i])) {
-        console.log("good file at", data[i]);
+        // console.log("good file at", data[i]);
         (function() {
           var model = data[i].split(".")[0].split("-");
           var file = directory + data[i];
-          
+
           if (model.length >= 2) {
             model = model[0] + capitalize(model[1]);
           } else {
@@ -330,16 +331,18 @@ var readAll= function(options) {
                           "attributes": [],
                           "relationships": {"belongsTo": [], "hasMany": []}
                         };
-          console.log('Looking for', file);
 
-          fs.readFile(path.resolve(process.cwd(), file), "utf8", function(err, fileData) {
-            console.log("FOUND FILE", file);
+          // console.log('Looking for', file);
+          // console.log(path.join(process.cwd(), file));
+
+          fs.readFile(path.join(process.cwd(), file), "utf-8", function(err, fileData) {            
+            // console.log("FOUND FILE", file);
             if (err) {
-              console.log(err);
+              // console.log(err);
               return "ERROR. No such file " + (file);
             }
 
-            console.log("FOUND FILE below", file);
+            // console.log("FOUND FILE below", file);
             readLines(fileData, addToModels, model);
 
             if (data[data.length - 1].split(".")[0] === model) {            
@@ -358,24 +361,41 @@ var readAll= function(options) {
 
               string += addStringScript()
 
-              fs.writeFile(path.resolve(process.cwd(), 'index.html'), string, function(err) {
+              fs.writeFile(path.join(process.cwd(), 'index.html'), string, function(err) {
                 if (err) {
                     return console.log(err);
                 }
-                console.log(models);
-                console.log("The file was saved!");
-                return models;
+                // console.log(models);
+                // console.log("The file was saved!");
+                callback(null, models);
               }); 
-            }
+            }            
           })
         })();
-
       }
     }
   });
 }
 
-// readAll();
-// this needs to be called during node process call
+function start(options, callback) {
+  directory = options || 'app/models/';
 
-module.exports = readAll;
+  if (options !== undefined) {
+    mainDirectory = '';
+  } else {
+    mainDirectory = process.cwd();
+  }
+  readAll(options, mainDirectory, function(err, modelsPassed) {
+    if (err) {
+      return err;
+    }
+    
+    // console.log("Returned models", modelsPassed);
+    return modelsPassed;
+    // callback(err, data);
+  });
+}
+
+start();
+
+module.exports = start;

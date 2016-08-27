@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Ember ERD</title>
+    <meta name='description' content=''>
+    <meta name='viewport' content='width=device-width', initial-scale='1'>
+    <style>
+      body,
+      html {
+        width: 100%;
+        height: 100%;
+      }
+
+      .models {
+        /*display: flex;
+        flex-direction: row;
+        overflow-x: scroll;
+        flex-wrap: wrap;*/
+        display: block;
+
+      }
+
+      .model {
+        display: inline-block;
+        border: 1px solid black;
+        width: 400px;
+        // height: 200px;
+        margin: 20px;
+        /*display: flex;*/
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+      }
+
+      .model .name,
+      .model .attrs,
+      .model .relations {        
+        width: 30%;
+        display: inline-block;
+        padding: 2px;
+        z-index: 100;
+      }
+
+      .model .attrs {
+        border-left: 1px solid black;
+        border-right: 1px solid black;
+      }
+
+      .model .name {        
+        font-weight: 900;
+      }
+
+      .model .attrs .attr-val {
+        color: lightgrey;
+        display: inline-block;
+      }
+
+      .arrow {
+        position: absolute;
+        background: black;
+        width: 40px;
+        height: 3px;
+        transform-origin: 0% 50%;
+        transition: all 100ms cubic-bezier(.8,.5,1,.8);
+        /*border-radius: 50%/100px 100px 0 0;*/
+        /*background-image: url("http://www.iconsdb.com/icons/preview/black/arrow-18-xxl.png");
+        background-size: cover;
+        background-position: center;*/
+        z-index: -1000;
+      }
+
+      .arrow:after {
+        display: block;
+        content:'';
+        border-top: 7px solid transparent;
+        border-bottom: 8px solid transparent;
+        border-left: 20px solid red;
+        transform: translate(40px, -5px);  
+      }
+
+      .row {        
+        text-align: center;
+      }
+
+      .row.offset .model {
+        width: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1> Ember ERD Model Visualizer</h1>
+    <div class="models">
+<div class='row'><div class="model" data-model="user" 
+                                     data-belongsTo="" 
+                                     data-hasMany="balanceChanges">
+                  <div class="name">
+                    user
+                  </div>
+                  <div class="attrs">
+                     currency <span class='attr-val'>string</span><br />  email <span class='attr-val'>string</span><br />  uid <span class='attr-val'>string</span><br />  nickname <span class='attr-val'>string</span><br />  image <span class='attr-val'>string</span><br />  online <span class='attr-val'>boolean</span><br />
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: balanceChanges
+                  </div>
+                </div></div><div class='row '><div class="model" data-model="balanceChange" 
+                                     data-belongsTo="user" 
+                                     data-hasMany="">
+                  <div class="name">
+                    balanceChange
+                  </div>
+                  <div class="attrs">
+                     changeType <span class='attr-val'>string</span><br />  entryDate <span class='attr-val'>string</span><br />  value <span class='attr-val'>number</span><br />
+                  </div>
+                  <div class="relations">
+                    belongsTo: user
+                    <br />
+                    hasMany: 
+                  </div>
+                </div>                      
+  </div>
+  <script>
+    function angle(p1,p2) { 
+      var dx=p2.x-p1.x,
+          dy=p2.y-p1.y,
+          c=Math.sqrt(dx*dx+dy*dy),
+          deg;
+      deg=(c>0) ? Math.asin(dy/c)/(Math.PI/180) : 0;
+      deg=(dx>0) ? deg : 180-deg;  
+      return (deg).toFixed(2); 
+    }
+
+    function pythagoras(point1, point2) {
+      return (Math.sqrt(Math.pow(Math.abs(point1.x-point2.x), 2) + Math.pow(Math.abs(point1.y-point2.y), 2)))
+    }
+
+    init = function() {
+      var arrows = document.getElementsByClassName('arrow');
+
+      for (var i = 0; i < arrows.length; i++) {
+        (function() {
+          arrows[i].remove();
+        })()
+      };
+      
+      var models = document.getElementsByClassName('model');
+      var belongsTo, hasMany, modelName;
+      for (var i =0; i < models.length; i++) {
+        belongsTo = models[i].dataset.belongsto
+        hasMany = models[i].dataset.hasmany
+        modelName = models[i].dataset.model
+        var divFrom = models[i]
+
+        if (hasMany.length !== 0) {
+          // name is pluralized so remove s to search
+          var rels = hasMany.split(" ")
+          for (var j = 0; j <  rels.length; j++) {
+
+            var toName = rels[j].slice(0, -1);
+            var divTo = document.querySelectorAll("[data-model='"+toName+"']")[0]
+
+            var divFromCoords = divFrom.getBoundingClientRect()
+            var divToCoords = divTo.getBoundingClientRect()
+            var divFromCenter = {
+              "x": divFromCoords.left + divFromCoords.width/2,
+              "y": divFromCoords.top + divFromCoords.height/2,
+            }
+
+            var divToCenter = {
+              "x": divToCoords.left + divToCoords.width/2,
+              "y": divToCoords.top + divToCoords.height/2,
+            }
+
+            // need to figure out where to put arrow,
+            // if the model from is above model to, then we aim for top of container
+            // if model from is below to (via top in coords), aim for the bottom of the model container
+            var newArrow = document.createElement("div"); 
+            newArrow.className += "arrow"
+            newArrow.className += " " + modelName + "_to_" + toName
+            newArrow.style.top = divFromCenter.y + "px";
+            newArrow.style.left = (divFromCenter.x) + "px"
+            // newArrow.style.bottom = divFromCoords.bottom + "px"
+            // newArrow.style.right = divFromCoords.right + "px";
+
+            var deg = angle({"x": divFromCenter.x,
+                           "y": divFromCenter.y
+                          }, 
+                        {"x": divToCenter.x, 
+                         "y": divToCenter.y
+                        });
+            
+            var distanceForArrow = pythagoras(divFromCenter, divToCenter) + "px"
+            
+            var prefixTransform = "transform";
+
+
+            newArrow.style[prefixTransform]="rotate(" + deg + "deg)";
+            newArrow.style.width = distanceForArrow;
+            
+            document.body.appendChild(newArrow);
+
+            if (divFromCoords.top > divToCoords.top) {
+              // arrow needs to point down
+              
+            } else {
+              // arrow needs to point up
+            }                              
+          }
+        }
+        
+      }
+      
+    }
+
+    window.onresize = init
+
+    init()
+  </script>
+  </body></html>
