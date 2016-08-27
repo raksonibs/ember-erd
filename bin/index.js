@@ -106,7 +106,7 @@ var string = `<!DOCTYPE html>
     </style>
   </head>
   <body>
-    <h1> Ember ERD Model Visualizer TEST4 </h1>
+    <h1> Ember ERD Model Visualizer</h1>
     <div class="models">
 `
 
@@ -301,56 +301,81 @@ function readLinesFromFile(keys, j, model, newRow) {
   string += modelString;
 }
 
-fs.readdir(path.resolve(process.cwd(), 'app/models/'), function (err, data) {
-  if (err) {
-    return console.log(err);
-  }
+var readAll= function(options) {
+  var directory = options || 'app/models/';
+  console.log("RUNNING WITH DIRECTORY", directory);
+  fs.readdir(path.resolve(process.cwd(), directory), function (err, data) {
+    if (err) {
+      console.log(err);
+      return "ERROR. No such directory";
+    }
 
-  for (var i = 0; i < data.length; i++) {
-    if (/\.js/.test(data[i])) {
+    console.log("FOUND DIRECTORY", directory);
+    console.log(data);
 
-      (function() {
-        var model = data[i].split(".")[0].split("-");
-        if (model.length >= 2) {
-          model = model[0] + capitalize(model[1]);
-        } else {
-          model = model[0];
-        }
+    for (var i = 0; i < data.length; i++) {
+      if (/\.js/.test(data[i])) {
+        console.log("good file at", data[i]);
+        (function() {
+          var model = data[i].split(".")[0].split("-");
+          var file = directory + data[i];
+          
+          if (model.length >= 2) {
+            model = model[0] + capitalize(model[1]);
+          } else {
+            model = model[0];
+          }
 
-        models[model] = {
-                        "attributes": [],
-                        "relationships": {"belongsTo": [], "hasMany": []}
-                      };
-        fs.readFile(path.resolve(process.cwd(), "app/models/" + data[i]), "utf8", function(err, fileData) {
-          readLines(fileData, addToModels, model);
+          models[model] = {
+                          "attributes": [],
+                          "relationships": {"belongsTo": [], "hasMany": []}
+                        };
+          console.log('Looking for', file);
 
-          if (data[data.length - 1].split(".")[0] === model) {            
-            var keys = _.keys(models);
-
-            var modelString = '';
-
-            keys = orderKeysBasedOnRelationships(keys);
-            var startKey = 0;
-
-            for (var j = 0; j < keys.length; j++) {
-              var num = keys[j][0];
-              readLinesFromFile(keys, j, model, startKey === num ? false : true);
-              startKey = num;
+          fs.readFile(path.resolve(process.cwd(), file), "utf8", function(err, fileData) {
+            console.log("FOUND FILE", file);
+            if (err) {
+              console.log(err);
+              return "ERROR. No such file " + (file);
             }
 
-            string += addStringScript()
+            console.log("FOUND FILE below", file);
+            readLines(fileData, addToModels, model);
 
-            fs.writeFile(path.resolve(process.cwd(), 'index.html'), string, function(err) {
-              if (err) {
-                  return console.log(err);
+            if (data[data.length - 1].split(".")[0] === model) {            
+              var keys = _.keys(models);
+
+              var modelString = '';
+
+              keys = orderKeysBasedOnRelationships(keys);
+              var startKey = 0;
+
+              for (var j = 0; j < keys.length; j++) {
+                var num = keys[j][0];
+                readLinesFromFile(keys, j, model, startKey === num ? false : true);
+                startKey = num;
               }
 
-              console.log("The file was saved!");
-            }); 
-          }
-        })
-      })();
+              string += addStringScript()
 
+              fs.writeFile(path.resolve(process.cwd(), 'index.html'), string, function(err) {
+                if (err) {
+                    return console.log(err);
+                }
+                console.log(models);
+                console.log("The file was saved!");
+                return models;
+              }); 
+            }
+          })
+        })();
+
+      }
     }
-  }
-})
+  });
+}
+
+// readAll();
+// this needs to be called during node process call
+
+module.exports = readAll;

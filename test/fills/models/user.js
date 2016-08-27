@@ -13,7 +13,6 @@ export default Model.extend({
   currencySymbol: Ember.computed('currency', function() {
     return currencies[this.get('currency')].symbol;
   }),
-  pets: hasMany('pet', {async: true}),
   balanceChanges: hasMany('balanceChange', {async: true}),
   online: attr('boolean'),
 });
