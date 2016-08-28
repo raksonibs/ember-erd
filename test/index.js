@@ -21,13 +21,19 @@ describe('Running', function() {
 
   it('Should output a two model file with two models with one relationship', function() {
     var expected = true
-    var result = start('test/fills/models/');
+    var result = start('test/fills/models3/');
     // assert.equal(result, '');
   });
 
   it('Should handle complex model files', function() {
     var expected = true
     var result = start('test/fills/models2/');    
+    assert.equal(true, expected);
+  });
+
+  it('Should reproduce Ghosts models', function() {
+    var expected = true
+    var result = start('test/fills/models/');    
     assert.equal(true, expected);
   });
 })
