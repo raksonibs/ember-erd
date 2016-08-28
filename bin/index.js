@@ -6,10 +6,19 @@ var path = require('path');
 var async = require("async");
 var _ = require("underscore");
 Q = require('q');
+var pluralize = require('pluralize')
 var appDir = path.dirname(require.main.filename);
 
 var capitalize = function(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+var uncapitalize = function(string) {
+  return string.charAt(0).toLowerCase() + string.slice(1);
+}
+
+var simplePluralize = function(string) {
+  return pluralize(string);
 }
 
 var models = {};
@@ -59,11 +68,13 @@ var string = `<!DOCTYPE html>
         display: inline-block;
         padding: 2px;
         z-index: 100;
+        height: 100%;
       }
 
       .model .attrs {
         border-left: 1px solid black;
         border-right: 1px solid black;
+        min-height: 150px;
       }
 
       .model .name {        
@@ -215,17 +226,44 @@ return `
   </body></html>`
 }
 
+function formatNonData(data, regex) {
+  console.log("DATA CONSOLING HERE", data);
+  console.log("RETURNING, ", data.slice(-1)[0].split("'")[1].replace(/[\(\);']/g, ''))
+  var value = data.slice(-1)[0].split("'")[1].replace(/[\(\);']/g, '');
+  return value;
+}
+
 function addToModels(data, model) {  
   var data = data.trim().replace(",", '');
 
-  if (/attr/.test(data) && !/import/.test(data)) {
+  if (/attr/.test(data) && !/import/.test(data) && !/delete/.test(data)) {
     models[model]["attributes"].push(data);
   } else if ((/hasMany/.test(data) || /belongsTo/.test(data)) && !/import/.test(data)) {
-    var formattedData = data.trim().split(":")[0]
-    if (/hasMany/.test(data)) {      
-      models[model]["relationships"]["hasMany"].push(formattedData);
-    } else {      
-      models[model]["relationships"]["belongsTo"].push(formattedData);
+    var formattedData = data.trim().split(":")[0];
+    var returnedStrung;
+
+    if (/return/.test(data)) {      
+      if (/hasMany/.test(formattedData)) {
+        returnedStrung = formatNonData(formattedData.split(/hasMany/), /hasMany/);
+        console.log("RETURNED OVER HERE FOR SOME REASION", returnedStrung);
+      } else if (/belongsToMany/) {
+        returnedStrung = formatNonData(formattedData.split(/belongsToMany/), /belongsToMany/)
+      } else {
+        returnedStrung = formatNonData(formattedData.split(/belongsTo/), /belongsTo/)
+      }
+
+      if (/return/.test(returnedStrung)) {
+        returnedStrung = returnedStrung.substring(returnedStrung.lastIndexOf("'") + 1, returnedStrung.lastIndexOf("'"));
+      }
+    }
+
+    var inputModelData = uncapitalize(returnedStrung || formattedData);
+
+    if (/hasMany/.test(data) || /belongsToMany/.test(data)) {
+      inputModelData = simplePluralize(inputModelData);
+      models[model]["relationships"]["hasMany"].push(inputModelData);
+    } else {            
+      models[model]["relationships"]["belongsTo"].push(inputModelData);
     }
   }  
 }
@@ -268,8 +306,13 @@ function readLinesFromFile(keys, j, model, newRow) {
   var numRelationships = keys[j][0];
   var modelString = '';
 
-  if (models[key]["attributes"] !== undefined) {      
-    var attributes = _.map(models[key]["attributes"], function(item) { return " " + item.trim().split(":")[0] + " <span class='attr-val'>" + item.trim().split(":")[1].trim().replace("(", "").replace(")", "").replace("\'", '').split('attr')[1].replace('\'', '') + "</span><br />"})
+  if (models[key]["attributes"] !== undefined) {
+    try {      
+      var attributes = _.map(models[key]["attributes"], function(item) { return " " + item.trim().split(":")[0] + " <span class='attr-val'>" + item.trim().split(":")[1].trim().replace(/[\(\)']/, "").split('attr')[1].replace('\'', '') + "</span><br />"})
+    } catch (error) {
+      // this is problematic, because in ghost's file the attrs are not determined via 
+      var attributes = []
+    }
   } else {
     var attributes = models[key]["attributes"]
   }
@@ -304,19 +347,19 @@ function readLinesFromFile(keys, j, model, newRow) {
 }
 
 function readAll(options, mainDirectory, callback) {  
-  // console.log("RUNNING WITH DIRECTORY", directory);
+  console.log("RUNNING WITH DIRECTORY", directory);
   fs.readdir(path.join(mainDirectory, directory), function (err, data) {
     if (err) {
-      // console.log(err);
+      console.log(err);
       return "ERROR. No such directory";
     }
 
-    // console.log("FOUND DIRECTORY", directory);
-    // console.log(data);
+    console.log("FOUND DIRECTORY", directory);
+    console.log(data);
 
     for (var i = 0; i < data.length; i++) {
       if (/\.js/.test(data[i])) {
-        // console.log("good file at", data[i]);
+        console.log("good file at", data[i]);
         (function() {
           var model = data[i].split(".")[0].split("-");
           var file = directory + data[i];
@@ -332,17 +375,17 @@ function readAll(options, mainDirectory, callback) {
                           "relationships": {"belongsTo": [], "hasMany": []}
                         };
 
-          // console.log('Looking for', file);
-          // console.log(path.join(process.cwd(), file));
+          console.log('Looking for', file);
+          console.log(path.join(process.cwd(), file));
 
           fs.readFile(path.join(process.cwd(), file), "utf-8", function(err, fileData) {            
-            // console.log("FOUND FILE", file);
+            console.log("FOUND FILE", file);
             if (err) {
-              // console.log(err);
+              console.log(err);
               return "ERROR. No such file " + (file);
             }
 
-            // console.log("FOUND FILE below", file);
+            console.log("FOUND FILE below", file);
             readLines(fileData, addToModels, model);
 
             if (data[data.length - 1].split(".")[0] === model) {            
@@ -365,8 +408,8 @@ function readAll(options, mainDirectory, callback) {
                 if (err) {
                     return console.log(err);
                 }
-                // console.log(models);
-                // console.log("The file was saved!");
+                console.log(models);
+                console.log("The file was saved!");
                 callback(null, models);
               }); 
             }            
@@ -380,6 +423,7 @@ function readAll(options, mainDirectory, callback) {
 function start(options, callback) {
   directory = options || 'app/models/';
 
+  console.log("SEARCHING IN", directory);
   if (options !== undefined) {
     mainDirectory = '';
   } else {
@@ -390,7 +434,7 @@ function start(options, callback) {
       return err;
     }
     
-    // console.log("Returned models", modelsPassed);
+    console.log("Returned models", modelsPassed);
     return modelsPassed;
     // callback(err, data);
   });

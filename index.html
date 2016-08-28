@@ -41,11 +41,13 @@
         display: inline-block;
         padding: 2px;
         z-index: 100;
+        height: 100%;
       }
 
       .model .attrs {
         border-left: 1px solid black;
         border-right: 1px solid black;
+        min-height: 150px;
       }
 
       .model .name {        
@@ -94,29 +96,113 @@
     <div class="models">
 <div class='row'><div class="model" data-model="user" 
                                      data-belongsTo="" 
-                                     data-hasMany="balanceChanges">
+                                     data-hasMany="pets battles gameStats">
                   <div class="name">
                     user
                   </div>
                   <div class="attrs">
-                     currency <span class='attr-val'>string</span><br />  email <span class='attr-val'>string</span><br />  uid <span class='attr-val'>string</span><br />  nickname <span class='attr-val'>string</span><br />  image <span class='attr-val'>string</span><br />  online <span class='attr-val'>boolean</span><br />
+                     currency <span class='attr-val'>string')</span><br />  email <span class='attr-val'>string')</span><br />  uid <span class='attr-val'>string')</span><br />  nickname <span class='attr-val'>string')</span><br />  image <span class='attr-val'>string')</span><br />  online <span class='attr-val'>boolean')</span><br />  avatar <span class='attr-val'>string')</span><br />
                   </div>
                   <div class="relations">
                     belongsTo: 
                     <br />
-                    hasMany: balanceChanges
+                    hasMany: pets, battles, gameStats
                   </div>
-                </div></div><div class='row '><div class="model" data-model="balanceChange" 
+                </div><div class="model" data-model="pet" 
                                      data-belongsTo="user" 
+                                     data-hasMany="stats battles petStates">
+                  <div class="name">
+                    pet
+                  </div>
+                  <div class="attrs">
+                     name <span class='attr-val'>string')</span><br />  level <span class='attr-val'>number')</span><br />  vertices <span class='attr-val'>number')</span><br />  colour <span class='attr-val'>string')</span><br />
+                  </div>
+                  <div class="relations">
+                    belongsTo: user
+                    <br />
+                    hasMany: stats, battles, petStates
+                  </div>
+                </div></div><div class='row offset'><div class="model" data-model="battle" 
+                                     data-belongsTo="state" 
+                                     data-hasMany="users pets">
+                  <div class="name">
+                    battle
+                  </div>
+                  <div class="attrs">
+                     winnerId <span class='attr-val'>number')</span><br />  loserId <span class='attr-val'>number')</span><br />  winnerEmail <span class='attr-val'>string')</span><br />  loserEmail <span class='attr-val'>string')</span><br />  name <span class='attr-val'>string')</span><br />  challengedEmail <span class='attr-val'>string')</span><br />  challengerEmail <span class='attr-val'>string')</span><br />  status <span class='attr-val'>string')</span><br />  challengerPetId <span class='attr-val'>string')</span><br />  challengedPetId <span class='attr-val'>string')</span><br />  challengerPet <span class='attr-val'>)</span><br />  challengedPet <span class='attr-val'>)</span><br />  currentTurn <span class='attr-val'>number')</span><br />  currentTurnEmail <span class='attr-val'>string')</span><br />  createdAt <span class='attr-val'>string')</span><br />
+                  </div>
+                  <div class="relations">
+                    belongsTo: state
+                    <br />
+                    hasMany: users, pets
+                  </div>
+                </div></div><div class='row '><div class="model" data-model="state" 
+                                     data-belongsTo="battle" 
+                                     data-hasMany="petStates">
+                  <div class="name">
+                    state
+                  </div>
+                  <div class="attrs">
+                     name <span class='attr-val'>string')</span><br />  currentTurn <span class='attr-val'>integer')</span><br />
+                  </div>
+                  <div class="relations">
+                    belongsTo: battle
+                    <br />
+                    hasMany: petStates
+                  </div>
+                </div></div><div class='row offset'><div class="model" data-model="stat" 
+                                     data-belongsTo="pet" 
+                                     data-hasMany="">
+                  <div class="name">
+                    stat
+                  </div>
+                  <div class="attrs">
+                     statType <span class='attr-val'>string')</span><br />  value <span class='attr-val'>number')</span><br />
+                  </div>
+                  <div class="relations">
+                    belongsTo: pet
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="petState" 
+                                     data-belongsTo="state pet" 
+                                     data-hasMany="">
+                  <div class="name">
+                    petState
+                  </div>
+                  <div class="attrs">
+                     currentHealth <span class='attr-val'>number')</span><br />  currentAttack <span class='attr-val'>number')</span><br />  currentDefence <span class='attr-val'>number')</span><br />  shield <span class='attr-val'>boolean')</span><br />
+                  </div>
+                  <div class="relations">
+                    belongsTo: state, pet
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="gameStat" 
+                                     data-belongsTo="user" 
+                                     data-hasMany="">
+                  <div class="name">
+                    gameStat
+                  </div>
+                  <div class="attrs">
+                     name <span class='attr-val'>string')</span><br />  value <span class='attr-val'>number')</span><br />
+                  </div>
+                  <div class="relations">
+                    belongsTo: user
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="balanceChange" 
+                                     data-belongsTo="" 
                                      data-hasMany="">
                   <div class="name">
                     balanceChange
                   </div>
                   <div class="attrs">
-                     changeType <span class='attr-val'>string</span><br />  entryDate <span class='attr-val'>string</span><br />  value <span class='attr-val'>number</span><br />
+                     changeType <span class='attr-val'>string')</span><br />  entryDate <span class='attr-val'>string')</span><br />  value <span class='attr-val'>number')</span><br />
                   </div>
                   <div class="relations">
-                    belongsTo: user
+                    belongsTo: 
                     <br />
                     hasMany: 
                   </div>
