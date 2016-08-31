@@ -227,8 +227,8 @@ return `
 }
 
 function formatNonData(data, regex) {
-  console.log("DATA CONSOLING HERE", data);
-  console.log("RETURNING, ", data.slice(-1)[0].split("'")[1].replace(/[\(\);']/g, ''))
+  // console.log("DATA CONSOLING HERE", data);
+  // console.log("RETURNING, ", data.slice(-1)[0].split("'")[1].replace(/[\(\);']/g, ''))
   var value = data.slice(-1)[0].split("'")[1].replace(/[\(\);']/g, '');
   return value;
 }
@@ -245,7 +245,7 @@ function addToModels(data, model) {
     if (/return/.test(data)) {      
       if (/hasMany/.test(formattedData)) {
         returnedStrung = formatNonData(formattedData.split(/hasMany/), /hasMany/);
-        console.log("RETURNED OVER HERE FOR SOME REASION", returnedStrung);
+        // console.log("RETURNED OVER HERE FOR SOME REASION", returnedStrung);
       } else if (/belongsToMany/) {
         returnedStrung = formatNonData(formattedData.split(/belongsToMany/), /belongsToMany/)
       } else {
@@ -347,19 +347,19 @@ function readLinesFromFile(keys, j, model, newRow) {
 }
 
 function readAll(options, mainDirectory, callback) {  
-  console.log("RUNNING WITH DIRECTORY", directory);
+  // console.log("RUNNING WITH DIRECTORY", directory);
   fs.readdir(path.join(mainDirectory, directory), function (err, data) {
     if (err) {
-      console.log(err);
+      // console.log(err);
       return "ERROR. No such directory";
     }
 
-    console.log("FOUND DIRECTORY", directory);
-    console.log(data);
+    // console.log("FOUND DIRECTORY", directory);
+    // console.log(data);
 
     for (var i = 0; i < data.length; i++) {
       if (/\.js/.test(data[i])) {
-        console.log("good file at", data[i]);
+        // console.log("good file at", data[i]);
         (function() {
           var model = data[i].split(".")[0].split("-");
           var file = directory + data[i];
@@ -375,17 +375,17 @@ function readAll(options, mainDirectory, callback) {
                           "relationships": {"belongsTo": [], "hasMany": []}
                         };
 
-          console.log('Looking for', file);
-          console.log(path.join(process.cwd(), file));
+          // console.log('Looking for', file);
+          // console.log(path.join(process.cwd(), file));
 
           fs.readFile(path.join(process.cwd(), file), "utf-8", function(err, fileData) {            
-            console.log("FOUND FILE", file);
+            // console.log("FOUND FILE", file);
             if (err) {
               console.log(err);
               return "ERROR. No such file " + (file);
             }
 
-            console.log("FOUND FILE below", file);
+            // console.log("FOUND FILE below", file);
             readLines(fileData, addToModels, model);
 
             if (data[data.length - 1].split(".")[0] === model) {            
@@ -408,8 +408,8 @@ function readAll(options, mainDirectory, callback) {
                 if (err) {
                     return console.log(err);
                 }
-                console.log(models);
-                console.log("The file was saved!");
+                // console.log(models);
+                // console.log("The file was saved!");
                 callback(null, models);
               }); 
             }            
@@ -423,7 +423,7 @@ function readAll(options, mainDirectory, callback) {
 function start(options, callback) {
   directory = options || 'app/models/';
 
-  console.log("SEARCHING IN", directory);
+  // console.log("SEARCHING IN", directory);
   if (options !== undefined) {
     mainDirectory = '';
   } else {
@@ -434,7 +434,7 @@ function start(options, callback) {
       return err;
     }
     
-    console.log("Returned models", modelsPassed);
+    // console.log("Returned models", modelsPassed);
     return modelsPassed;
     // callback(err, data);
   });
