@@ -1,31 +1,31 @@
 #! /usr/bin/env node
 
-var requirejs = require('requirejs');
-var fs = require('fs');
-var path = require('path');
-var async = require("async");
-var _ = require("underscore");
+const requirejs = require('requirejs');
+const fs = require('fs');
+const path = require('path');
+const async = require("async");
+const _ = require("underscore");
 Q = require('q');
-var pluralize = require('pluralize')
-var appDir = path.dirname(require.main.filename);
+const pluralize = require('pluralize');
+const appDir = path.dirname(require.main.filename);
 
-var capitalize = function(string) {
+const capitalize = function (string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
-}
+};
 
-var uncapitalize = function(string) {
+const uncapitalize = function (string) {
   return string.charAt(0).toLowerCase() + string.slice(1);
-}
+};
 
-var simplePluralize = function(string) {
+const simplePluralize = function (string) {
   return pluralize(string);
-}
+};
 
-var models = {};
-var directory;
-var mainDirectory;
+let models = {};
+let directory;
+let mainDirectory;
 
-var string = `<!DOCTYPE html>
+let string = `<!DOCTYPE html>
 <html>
   <head>
     <meta charset='utf-8'>
@@ -121,14 +121,14 @@ var string = `<!DOCTYPE html>
   <body>
     <h1> Ember ERD Model Visualizer</h1>
     <div class="models">
-`
+`;
 
 function addStringScript() {
 return `                      
   </div>
   <script>
     function angle(p1,p2) { 
-      var dx=p2.x-p1.x,
+      let dx=p2.x-p1.x,
           dy=p2.y-p1.y,
           c=Math.sqrt(dx*dx+dy*dy),
           deg;
@@ -142,63 +142,63 @@ return `
     }
 
     init = function() {
-      var arrows = document.getElementsByClassName('arrow');
+      let arrows = document.getElementsByClassName('arrow');
 
-      for (var i = 0; i < arrows.length; i++) {
+      for (let i = 0; i < arrows.length; i++) {
         (function() {
           arrows[i].remove();
         })()
-      };
+      }
       
-      var models = document.getElementsByClassName('model');
-      var belongsTo, hasMany, modelName;
-      for (var i =0; i < models.length; i++) {
-        belongsTo = models[i].dataset.belongsto
-        hasMany = models[i].dataset.hasmany
-        modelName = models[i].dataset.model
-        var divFrom = models[i]
+      let models = document.getElementsByClassName('model');
+      let belongsTo, hasMany, modelName;
+      for (let i =0; i < models.length; i++) {
+        belongsTo = models[i].dataset.belongsto;
+        hasMany = models[i].dataset.hasmany;
+        modelName = models[i].dataset.model;
+        let divFrom = models[i];
 
         if (hasMany.length !== 0) {
           // name is pluralized so remove s to search
-          var rels = hasMany.split(" ")
-          for (var j = 0; j <  rels.length; j++) {
+          let rels = hasMany.split(" ");
+          for (let j = 0; j <  rels.length; j++) {
 
-            var toName = rels[j].slice(0, -1);
-            var divTo = document.querySelectorAll("[data-model='"+toName+"']")[0]
+            let toName = rels[j].slice(0, -1);
+            let divTo = document.querySelectorAll("[data-model='"+toName+"']")[0];
 
-            var divFromCoords = divFrom.getBoundingClientRect()
-            var divToCoords = divTo.getBoundingClientRect()
-            var divFromCenter = {
+            let divFromCoords = divFrom.getBoundingClientRect();
+            let divToCoords = divTo.getBoundingClientRect();
+            let divFromCenter = {
               "x": divFromCoords.left + divFromCoords.width/2,
               "y": divFromCoords.top + divFromCoords.height/2,
-            }
+            };
 
-            var divToCenter = {
+            let divToCenter = {
               "x": divToCoords.left + divToCoords.width/2,
               "y": divToCoords.top + divToCoords.height/2,
-            }
+            };
 
             // need to figure out where to put arrow,
             // if the model from is above model to, then we aim for top of container
             // if model from is below to (via top in coords), aim for the bottom of the model container
-            var newArrow = document.createElement("div"); 
-            newArrow.className += "arrow"
-            newArrow.className += " " + modelName + "_to_" + toName
+            let newArrow = document.createElement("div"); 
+            newArrow.className += "arrow";
+            newArrow.className += " " + modelName + "_to_" + toName;
             newArrow.style.top = divFromCenter.y + "px";
-            newArrow.style.left = (divFromCenter.x) + "px"
+            newArrow.style.left = (divFromCenter.x) + "px";
             // newArrow.style.bottom = divFromCoords.bottom + "px"
             // newArrow.style.right = divFromCoords.right + "px";
 
-            var deg = angle({"x": divFromCenter.x,
+            let deg = angle({"x": divFromCenter.x,
                            "y": divFromCenter.y
                           }, 
                         {"x": divToCenter.x, 
                          "y": divToCenter.y
                         });
             
-            var distanceForArrow = pythagoras(divFromCenter, divToCenter) + "px"
+            let distanceForArrow = pythagoras(divFromCenter, divToCenter) + "px";
             
-            var prefixTransform = "transform";
+            let prefixTransform = "transform";
 
 
             newArrow.style[prefixTransform]="rotate(" + deg + "deg)";
@@ -217,9 +217,9 @@ return `
         
       }
       
-    }
+    };
 
-    window.onresize = init
+    window.onresize = init;
 
     init()
   </script>
@@ -229,20 +229,19 @@ return `
 function formatNonData(data, regex) {
   // console.log("DATA CONSOLING HERE", data);
   // console.log("RETURNING, ", data.slice(-1)[0].split("'")[1].replace(/[\(\);']/g, ''))
-  var value = data.slice(-1)[0].split("'")[1].replace(/[\(\);']/g, '');
-  return value;
+  return data.slice(-1)[0].split("'")[1].replace(/[\(\);']/g, '');
 }
 
-function addToModels(data, model) {  
-  var data = data.trim().replace(",", '');
+function addToModels(data, model) {
+  data = data.trim().replace(",", '');
 
   if (/attr/.test(data) && !/import/.test(data) && !/delete/.test(data)) {
     models[model]["attributes"].push(data);
   } else if ((/hasMany/.test(data) || /belongsTo/.test(data)) && !/import/.test(data)) {
-    var formattedData = data.trim().split(":")[0];
-    var returnedStrung;
+    let formattedData = data.trim().split(":")[0];
+    let returnedStrung;
 
-    if (/return/.test(data)) {      
+    if (/return/.test(data)) {
       if (/hasMany/.test(formattedData)) {
         returnedStrung = formatNonData(formattedData.split(/hasMany/), /hasMany/);
         // console.log("RETURNED OVER HERE FOR SOME REASION", returnedStrung);
@@ -257,39 +256,39 @@ function addToModels(data, model) {
       }
     }
 
-    var inputModelData = uncapitalize(returnedStrung || formattedData);
+    let inputModelData = uncapitalize(returnedStrung || formattedData);
 
     if (/hasMany/.test(data) || /belongsToMany/.test(data)) {
       inputModelData = simplePluralize(inputModelData);
       models[model]["relationships"]["hasMany"].push(inputModelData);
-    } else {            
+    } else {
       models[model]["relationships"]["belongsTo"].push(inputModelData);
     }
-  }  
+  }
 }
 
 function orderKeysBasedOnRelationships(keys) {
-  var modelArray = [];
-  for (var i = 0; i < keys.length; i++) {
-    var numRelationships = [models[keys[i]].relationships.hasMany.length, keys[i]]
+  let modelArray = [];
+  for (let i = 0; i < keys.length; i++) {
+    const numRelationships = [models[keys[i]].relationships.hasMany.length, keys[i]]
 
     modelArray.push(numRelationships)
   }
 
-  var newKeys = _.sortBy(modelArray, function(key) { return key[0] })
-  
+  let newKeys = _.sortBy(modelArray, function(key) { return key[0] })
+
   return newKeys.reverse();
 }
 
 function readLines(data, addToModels, model) {
-  var remaining = "";
+  let remaining = "";
 
   remaining += data;
-  var index = remaining.indexOf('\n');
-  var last = 0;
+  let index = remaining.indexOf('\n');
+  let last = 0;
   while (index > -1) {
-    var line = remaining.substring(last, index);
-    last = index + 1; 
+    let line = remaining.substring(last, index);
+    last = index + 1;
     addToModels(line, model);
     index = remaining.indexOf('\n', last);
   }
@@ -302,24 +301,27 @@ function readLines(data, addToModels, model) {
 }
 
 function readLinesFromFile(keys, j, model, newRow) {
-  var key = keys[j][1];
-  var numRelationships = keys[j][0];
-  var modelString = '';
+  let key = keys[j][1];
+  let numRelationships = keys[j][0];
+  let modelString = '';
 
+  let attributes;
   if (models[key]["attributes"] !== undefined) {
-    try {      
-      var attributes = _.map(models[key]["attributes"], function(item) { return " " + item.trim().split(":")[0] + " <span class='attr-val'>" + item.trim().split(":")[1].trim().replace(/[\(\)']/, "").split('attr')[1].replace('\'', '') + "</span><br />"})
+    try {
+      attributes = _.map(models[key]["attributes"], function (item) {
+        return " " + item.trim().split(":")[0] + " <span class='attr-val'>" + item.trim().split(":")[1].trim().replace(/[\(\)']/, "").split('attr')[1].replace('\'', '') + "</span><br />"
+      })
     } catch (error) {
-      // this is problematic, because in ghost's file the attrs are not determined via 
-      var attributes = []
+      // this is problematic, because in ghost's file the attrs are not determined via
+      attributes = []
     }
   } else {
-    var attributes = models[key]["attributes"]
+    attributes = models[key]["attributes"]
   }
 
-  var relationships = models[key]["relationships"];
+  let relationships = models[key]["relationships"];
 
-  
+
   if (newRow && j !== 0) {
     // need to close old new row
     modelString += `</div><div class='row ${j % 2 === 0 ? 'offset' : ''}'>`
@@ -341,12 +343,12 @@ function readLinesFromFile(keys, j, model, newRow) {
                     <br />
                     hasMany: ${relationships["hasMany"].join(", ")}
                   </div>
-                </div>`
+                </div>`;
 
   string += modelString;
 }
 
-function readAll(options, mainDirectory, callback) {  
+function readAll(options, mainDirectory, callback) {
   // console.log("RUNNING WITH DIRECTORY", directory);
   fs.readdir(path.join(mainDirectory, directory), function (err, data) {
     if (err) {
@@ -357,12 +359,12 @@ function readAll(options, mainDirectory, callback) {
     // console.log("FOUND DIRECTORY", directory);
     // console.log(data);
 
-    for (var i = 0; i < data.length; i++) {
+    for (let i = 0; i < data.length; i++) {
       if (/\.js/.test(data[i])) {
         // console.log("good file at", data[i]);
         (function() {
-          var model = data[i].split(".")[0].split("-");
-          var file = directory + data[i];
+          let model = data[i].split(".")[0].split("-");
+          let file = directory + data[i];
 
           if (model.length >= 2) {
             model = model[0] + capitalize(model[1]);
@@ -378,7 +380,7 @@ function readAll(options, mainDirectory, callback) {
           // console.log('Looking for', file);
           // console.log(path.join(process.cwd(), file));
 
-          fs.readFile(path.join(process.cwd(), file), "utf-8", function(err, fileData) {            
+          fs.readFile(path.join(process.cwd(), file), "utf-8", function (err, fileData) {
             // console.log("FOUND FILE", file);
             if (err) {
               console.log(err);
@@ -388,21 +390,21 @@ function readAll(options, mainDirectory, callback) {
             // console.log("FOUND FILE below", file);
             readLines(fileData, addToModels, model);
 
-            if (data[data.length - 1].split(".")[0] === model) {            
-              var keys = _.keys(models);
+            if (data[data.length - 1].split(".")[0] === model) {
+              let keys = _.keys(models);
 
-              var modelString = '';
+              let modelString = '';
 
               keys = orderKeysBasedOnRelationships(keys);
-              var startKey = 0;
+              let startKey = 0;
 
-              for (var j = 0; j < keys.length; j++) {
-                var num = keys[j][0];
-                readLinesFromFile(keys, j, model, startKey === num ? false : true);
+              for (let j = 0; j < keys.length; j++) {
+                let num = keys[j][0];
+                readLinesFromFile(keys, j, model, startKey !== num);
                 startKey = num;
               }
 
-              string += addStringScript()
+              string += addStringScript();
 
               fs.writeFile(path.join(process.cwd(), 'index.html'), string, function(err) {
                 if (err) {
@@ -411,8 +413,8 @@ function readAll(options, mainDirectory, callback) {
                 // console.log(models);
                 // console.log("The file was saved!");
                 callback(null, models);
-              }); 
-            }            
+              });
+            }
           })
         })();
       }
@@ -433,7 +435,7 @@ function start(options, callback) {
     if (err) {
       return err;
     }
-    
+
     // console.log("Returned models", modelsPassed);
     return modelsPassed;
     // callback(err, data);

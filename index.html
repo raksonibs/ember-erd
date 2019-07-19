@@ -96,19 +96,216 @@
     <div class="models">
 <div class='row'><div class="model" data-model="user" 
                                      data-belongsTo="" 
-                                     data-hasMany="pets battles gameStats">
+                                     data-hasMany="balanceChanges">
                   <div class="name">
                     user
                   </div>
                   <div class="attrs">
-                     currency <span class='attr-val'>string')</span><br />  email <span class='attr-val'>string')</span><br />  uid <span class='attr-val'>string')</span><br />  nickname <span class='attr-val'>string')</span><br />  image <span class='attr-val'>string')</span><br />  online <span class='attr-val'>boolean')</span><br />  avatar <span class='attr-val'>string')</span><br />
+                     currency <span class='attr-val'>string')</span><br />  email <span class='attr-val'>string')</span><br />  uid <span class='attr-val'>string')</span><br />  nickname <span class='attr-val'>string')</span><br />  image <span class='attr-val'>string')</span><br />  online <span class='attr-val'>boolean')</span><br />
                   </div>
                   <div class="relations">
                     belongsTo: 
                     <br />
-                    hasMany: pets, battles, gameStats
+                    hasMany: balanceChanges
+                  </div>
+                </div></div><div class='row '><div class="model" data-model="state" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    state
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="stat" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    stat
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
                   </div>
                 </div><div class="model" data-model="pet" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    pet
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="petState" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    petState
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="gameStat" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    gameStat
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="battle" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    battle
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="balanceChange" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    balanceChange
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
+                  </div>
+                </div>                      
+  </div>
+  <script>
+    function angle(p1,p2) { 
+      let dx=p2.x-p1.x,
+          dy=p2.y-p1.y,
+          c=Math.sqrt(dx*dx+dy*dy),
+          deg;
+      deg=(c>0) ? Math.asin(dy/c)/(Math.PI/180) : 0;
+      deg=(dx>0) ? deg : 180-deg;  
+      return (deg).toFixed(2); 
+    }
+
+    function pythagoras(point1, point2) {
+      return (Math.sqrt(Math.pow(Math.abs(point1.x-point2.x), 2) + Math.pow(Math.abs(point1.y-point2.y), 2)))
+    }
+
+    init = function() {
+      let arrows = document.getElementsByClassName('arrow');
+
+      for (let i = 0; i < arrows.length; i++) {
+        (function() {
+          arrows[i].remove();
+        })()
+      }
+      
+      let models = document.getElementsByClassName('model');
+      let belongsTo, hasMany, modelName;
+      for (let i =0; i < models.length; i++) {
+        belongsTo = models[i].dataset.belongsto;
+        hasMany = models[i].dataset.hasmany;
+        modelName = models[i].dataset.model;
+        let divFrom = models[i];
+
+        if (hasMany.length !== 0) {
+          // name is pluralized so remove s to search
+          let rels = hasMany.split(" ");
+          for (let j = 0; j <  rels.length; j++) {
+
+            let toName = rels[j].slice(0, -1);
+            let divTo = document.querySelectorAll("[data-model='"+toName+"']")[0];
+
+            let divFromCoords = divFrom.getBoundingClientRect();
+            let divToCoords = divTo.getBoundingClientRect();
+            let divFromCenter = {
+              "x": divFromCoords.left + divFromCoords.width/2,
+              "y": divFromCoords.top + divFromCoords.height/2,
+            };
+
+            let divToCenter = {
+              "x": divToCoords.left + divToCoords.width/2,
+              "y": divToCoords.top + divToCoords.height/2,
+            };
+
+            // need to figure out where to put arrow,
+            // if the model from is above model to, then we aim for top of container
+            // if model from is below to (via top in coords), aim for the bottom of the model container
+            let newArrow = document.createElement("div"); 
+            newArrow.className += "arrow";
+            newArrow.className += " " + modelName + "_to_" + toName;
+            newArrow.style.top = divFromCenter.y + "px";
+            newArrow.style.left = (divFromCenter.x) + "px";
+            // newArrow.style.bottom = divFromCoords.bottom + "px"
+            // newArrow.style.right = divFromCoords.right + "px";
+
+            let deg = angle({"x": divFromCenter.x,
+                           "y": divFromCenter.y
+                          }, 
+                        {"x": divToCenter.x, 
+                         "y": divToCenter.y
+                        });
+            
+            let distanceForArrow = pythagoras(divFromCenter, divToCenter) + "px";
+            
+            let prefixTransform = "transform";
+
+
+            newArrow.style[prefixTransform]="rotate(" + deg + "deg)";
+            newArrow.style.width = distanceForArrow;
+            
+            document.body.appendChild(newArrow);
+
+            if (divFromCoords.top > divToCoords.top) {
+              // arrow needs to point down
+              
+            } else {
+              // arrow needs to point up
+            }                              
+          }
+        }
+        
+      }
+      
+    };
+
+    window.onresize = init;
+
+    init()
+  </script>
+  </body></html><div class='row'><div class="model" data-model="pet" 
                                      data-belongsTo="user" 
                                      data-hasMany="stats battles petStates">
                   <div class="name">
@@ -121,6 +318,20 @@
                     belongsTo: user
                     <br />
                     hasMany: stats, battles, petStates
+                  </div>
+                </div><div class="model" data-model="user" 
+                                     data-belongsTo="" 
+                                     data-hasMany="pets battles gameStats">
+                  <div class="name">
+                    user
+                  </div>
+                  <div class="attrs">
+                     currency <span class='attr-val'>string')</span><br />  email <span class='attr-val'>string')</span><br />  uid <span class='attr-val'>string')</span><br />  nickname <span class='attr-val'>string')</span><br />  image <span class='attr-val'>string')</span><br />  online <span class='attr-val'>boolean')</span><br />  avatar <span class='attr-val'>string')</span><br />
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: pets, battles, gameStats
                   </div>
                 </div></div><div class='row offset'><div class="model" data-model="battle" 
                                      data-belongsTo="state" 
@@ -150,7 +361,203 @@
                     <br />
                     hasMany: petStates
                   </div>
-                </div></div><div class='row offset'><div class="model" data-model="stat" 
+                </div></div><div class='row offset'><div class="model" data-model="tag" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    tag
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="subscriber" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    subscriber
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="settings" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    settings
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="role" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    role
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="refreshtoken" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    refreshtoken
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="post" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    post
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="permission" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    permission
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="index" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    index
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="client" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    client
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="clientTrusted" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    clientTrusted
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="app" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    app
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="appSetting" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    appSetting
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="appField" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    appField
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="accesstoken" 
+                                     data-belongsTo="" 
+                                     data-hasMany="">
+                  <div class="name">
+                    accesstoken
+                  </div>
+                  <div class="attrs">
+                    
+                  </div>
+                  <div class="relations">
+                    belongsTo: 
+                    <br />
+                    hasMany: 
+                  </div>
+                </div><div class="model" data-model="stat" 
                                      data-belongsTo="pet" 
                                      data-hasMany="">
                   <div class="name">
@@ -210,7 +617,7 @@
   </div>
   <script>
     function angle(p1,p2) { 
-      var dx=p2.x-p1.x,
+      let dx=p2.x-p1.x,
           dy=p2.y-p1.y,
           c=Math.sqrt(dx*dx+dy*dy),
           deg;
@@ -224,63 +631,63 @@
     }
 
     init = function() {
-      var arrows = document.getElementsByClassName('arrow');
+      let arrows = document.getElementsByClassName('arrow');
 
-      for (var i = 0; i < arrows.length; i++) {
+      for (let i = 0; i < arrows.length; i++) {
         (function() {
           arrows[i].remove();
         })()
-      };
+      }
       
-      var models = document.getElementsByClassName('model');
-      var belongsTo, hasMany, modelName;
-      for (var i =0; i < models.length; i++) {
-        belongsTo = models[i].dataset.belongsto
-        hasMany = models[i].dataset.hasmany
-        modelName = models[i].dataset.model
-        var divFrom = models[i]
+      let models = document.getElementsByClassName('model');
+      let belongsTo, hasMany, modelName;
+      for (let i =0; i < models.length; i++) {
+        belongsTo = models[i].dataset.belongsto;
+        hasMany = models[i].dataset.hasmany;
+        modelName = models[i].dataset.model;
+        let divFrom = models[i];
 
         if (hasMany.length !== 0) {
           // name is pluralized so remove s to search
-          var rels = hasMany.split(" ")
-          for (var j = 0; j <  rels.length; j++) {
+          let rels = hasMany.split(" ");
+          for (let j = 0; j <  rels.length; j++) {
 
-            var toName = rels[j].slice(0, -1);
-            var divTo = document.querySelectorAll("[data-model='"+toName+"']")[0]
+            let toName = rels[j].slice(0, -1);
+            let divTo = document.querySelectorAll("[data-model='"+toName+"']")[0];
 
-            var divFromCoords = divFrom.getBoundingClientRect()
-            var divToCoords = divTo.getBoundingClientRect()
-            var divFromCenter = {
+            let divFromCoords = divFrom.getBoundingClientRect();
+            let divToCoords = divTo.getBoundingClientRect();
+            let divFromCenter = {
               "x": divFromCoords.left + divFromCoords.width/2,
               "y": divFromCoords.top + divFromCoords.height/2,
-            }
+            };
 
-            var divToCenter = {
+            let divToCenter = {
               "x": divToCoords.left + divToCoords.width/2,
               "y": divToCoords.top + divToCoords.height/2,
-            }
+            };
 
             // need to figure out where to put arrow,
             // if the model from is above model to, then we aim for top of container
             // if model from is below to (via top in coords), aim for the bottom of the model container
-            var newArrow = document.createElement("div"); 
-            newArrow.className += "arrow"
-            newArrow.className += " " + modelName + "_to_" + toName
+            let newArrow = document.createElement("div"); 
+            newArrow.className += "arrow";
+            newArrow.className += " " + modelName + "_to_" + toName;
             newArrow.style.top = divFromCenter.y + "px";
-            newArrow.style.left = (divFromCenter.x) + "px"
+            newArrow.style.left = (divFromCenter.x) + "px";
             // newArrow.style.bottom = divFromCoords.bottom + "px"
             // newArrow.style.right = divFromCoords.right + "px";
 
-            var deg = angle({"x": divFromCenter.x,
+            let deg = angle({"x": divFromCenter.x,
                            "y": divFromCenter.y
                           }, 
                         {"x": divToCenter.x, 
                          "y": divToCenter.y
                         });
             
-            var distanceForArrow = pythagoras(divFromCenter, divToCenter) + "px"
+            let distanceForArrow = pythagoras(divFromCenter, divToCenter) + "px";
             
-            var prefixTransform = "transform";
+            let prefixTransform = "transform";
 
 
             newArrow.style[prefixTransform]="rotate(" + deg + "deg)";
@@ -299,9 +706,9 @@
         
       }
       
-    }
+    };
 
-    window.onresize = init
+    window.onresize = init;
 
     init()
   </script>
